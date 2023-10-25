@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>three sdf</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
+</head>
+<body>
+	<div class="title">threesdf</div>
+	<div class="subtitle">WebGL SDF<div class="info">Done with three.js</div></div>
+
+	<div id="container"></div>
+	<script type="text/javascript" src="js/three.js"></script>
+	<script type="text/javascript" src="js/OrbitControls.js"></script>
+	<script type="text/javascript" src="js/GLTFLoader.js"></script>
+	<script type="text/javascript" src="js/raymarcher.js"></script>
+	<script type="text/javascript" src="js/bone_parser.js"></script>
+	
+	<script type="text/javascript">
+		
+		const title = document.querySelector('.title');
+		const subtitle = document.querySelector('.subtitle');
+
+		const _rm = RayMarcher();
+		const _camera = _rm.getCamera();
+
+		let _boneparser, _orbit;
+
+		_camera.position.x = 6;
+        _camera.position.y = 10;
+        _camera.position.z = 10;
+
+		
+        const onResize = e => {
+        	_rm.setSize( window.innerWidth, window.innerHeight );
+    	}
+
+    	const animate = time => {
+        	requestAnimationFrame( animate );
+
+        	_orbit.update();
+        	_boneparser.update(time);
+        	_rm.update(time);
+   		}
+
+   		window.resize = onResize;
+
+   		(async _ => {
+   			await _rm.onStart({
+				precision:0.25,
+				distance:156,
+				fragmentUrl:'shaders/template.frag'
+			});
+
+   			console.log('Everything should be ready here.');
+
+   			/*var path = "cubemap/cube03_";
+	        var format = '.png';
+	        var urls = [
+	            path + '0' + format, path + '1' + format,
+	            path + '2' + format, path + '3' + format,
+	            path + '4' + format, path + '5' + format
+	        ];*/
+
+	        var path = 'cubemap2/';
+			var format = '.png';
+			var urls = [
+				path + 'posx' + format, path + 'negx' + format,
+				path + 'posy' + format, path + 'negy' + format,
+				path + 'posz' + format, path + 'negz' + format
+			];
+
+	        _rm.setCubemap("cubemap", urls );
+
+   			_orbit = new THREE.OrbitControls( _camera, _rm.getDomElement() );
+	        _orbit.minDistance = 8;
+	        _orbit.maxDistance = 40;
+	        _orbit.minPolarAngle = Math.PI / 4 - Math.PI / 12;
+	        _orbit.maxPolarAngle = Math.PI / 2 - Math.PI / 8;
+
+   			_boneparser = BoneParser(_rm, 'models/break.glb');
+			
+			animate();
+	        onResize();
+	        title.classList.add('show')
+			subtitle.classList.add('show')
+		})();
+		
+
+	</script>
+</body>
+</html>
